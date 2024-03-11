@@ -32,28 +32,28 @@ function createCountryElement(mainCountryData, className = '') {
   countriesContainer.style.opacity = 1;
 }
 // ///////////////////////////////////////////////////////////////////////////
-const countriesData = function (country) {
-  const request = new XMLHttpRequest();
-  const routeURL = country === 'all' ? 'all' : `name/${country}`;
-  request.open('GET', `https://restcountries.com/v3.1/${routeURL}`);
-  request.send();
+// const countriesData = function (country) {
+//   const request = new XMLHttpRequest();
+//   const routeURL = country === 'all' ? 'all' : `name/${country}`;
+//   request.open('GET', `https://restcountries.com/v3.1/${routeURL}`);
+//   request.send();
 
-  request.addEventListener('load', function () {
-    const [data1] = JSON.parse(this.responseText);
-    createCountryElement(data1);
+//   request.addEventListener('load', function () {
+//     const [data1] = JSON.parse(this.responseText);
+//     createCountryElement(data1);
 
-    const neighbour = data1.borders?.[0];
-    if (!neighbour) return;
+//     const neighbour = data1.borders?.[0];
+//     if (!neighbour) return;
 
-    const request2 = new XMLHttpRequest();
-    request2.open('GET', `https://restcountries.com/v3.1/alpha/${neighbour}`);
-    request2.send();
-    request2.addEventListener('load', function () {
-      const [data2] = JSON.parse(this.responseText);
-      createCountryElement(data2, 'neighbour');
-    });
-  });
-};
+//     const request2 = new XMLHttpRequest();
+//     request2.open('GET', `https://restcountries.com/v3.1/alpha/${neighbour}`);
+//     request2.send();
+//     request2.addEventListener('load', function () {
+//       const [data2] = JSON.parse(this.responseText);
+//       createCountryElement(data2, 'neighbour');
+//     });
+//   });
+// };
 
 let changed;
 check.addEventListener('change', function () {
@@ -64,6 +64,21 @@ input.focus();
 form.addEventListener('submit', e => {
   e.preventDefault();
   countriesContainer.innerHTML = '';
-  countriesData(input.value);
+  // countriesData(input.value);
+  getcountryData(input.value);
   input.value = '';
 });
+
+function getcountryData(routeURL) {
+  fetch(`https://restcountries.com/v3.1/name/${routeURL}`)
+    .then(res => res.json())
+    .then(data => {
+      createCountryElement(data[0]);
+      const neighbour = data[0].borders[0];
+      if (!neighbour) return;
+
+      return fetch(`https://restcountries.com/v3.1/alpha/${neighbour}`)
+        .then(res => res.json())
+        .then(data => createCountryElement(data[0], 'neighbour'));
+    });
+}
