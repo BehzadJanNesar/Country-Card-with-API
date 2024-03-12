@@ -71,7 +71,10 @@ form.addEventListener('submit', e => {
 
 function getcountryData(routeURL) {
   fetch(`https://restcountries.com/v3.1/name/${routeURL}`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error(`Country not found... (${res.status})`);
+      return res.json();
+    })
     .then(data => {
       createCountryElement(data[0]);
       const neighbour = data[0].borders[0];
@@ -80,5 +83,6 @@ function getcountryData(routeURL) {
       return fetch(`https://restcountries.com/v3.1/alpha/${neighbour}`)
         .then(res => res.json())
         .then(data => createCountryElement(data[0], 'neighbour'));
-    });
+    })
+    .catch(err => console.log(err));
 }
